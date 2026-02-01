@@ -17,5 +17,5 @@ class TagSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ["id", "author", "tag", "client"]
+        fields = ["id", "author", "tags", "client"]
         read_only_fields = ["author", "client"]

@@ -12,10 +12,8 @@ class User(AbstractUser):
         return self.email
 
 
-class CustomerProfile(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="custormer_profile"
-    )
+class MemberProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     phone_number = models.CharField(max_length=12, blank=True, null=True)
 
     def __str__(self):

@@ -23,7 +23,7 @@ class Review(models.Model):
         related_name="reviews",
         null=True,
     )
-    tag = models.ManyToManyField(Tag, related_name="reviews")
+    tags = models.ManyToManyField(Tag, related_name="reviews")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="reviews")
 
     def __str__(self):

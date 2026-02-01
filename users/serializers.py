@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import User, CustomerProfile
+from users.models import User, MemberProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,11 +13,11 @@ class CustomerSignUpSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
-        model = CustomerProfile
+        model = MemberProfile
         fields = ["user", "phone_number"]
 
     def create(self, validated_data):
         user_data = validated_data.pop("user")
         user = User.objects.create_user(**user_data)
-        proflile = CustomerProfile.objects.create(user=user, **validated_data)
-        return proflile
+        profile = MemberProfile.objects.create(user=user, **validated_data)
+        return profile

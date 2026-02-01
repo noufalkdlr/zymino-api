@@ -50,10 +50,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        id = self.kwargs["client_id"]
-        return Review.objects.filter(client__id=id)
+        client_id = self.kwargs["client_id"]
+        return Review.objects.filter(client__id=client_id)
 
     def perform_create(self, serializer):
-        id = self.kwargs["client_id"]
-        client = get_object_or_404(Client, id=id)
+        client_id = self.kwargs["client_id"]
+        client = get_object_or_404(Client, id=client_id)
         return serializer.save(author=self.request.user, client=client)
