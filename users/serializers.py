@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import User, MemberProfile
+from users.models import User, UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -9,15 +9,15 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
 
-class CustomerSignUpSerializer(serializers.ModelSerializer):
+class UserSignUpSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
-        model = MemberProfile
+        model = UserProfile
         fields = ["user", "phone_number"]
 
     def create(self, validated_data):
         user_data = validated_data.pop("user")
         user = User.objects.create_user(**user_data)
-        profile = MemberProfile.objects.create(user=user, **validated_data)
+        profile = UserProfile.objects.create(user=user, **validated_data)
         return profile

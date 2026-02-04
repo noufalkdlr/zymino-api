@@ -1,0 +1,23 @@
+meta {
+  name: get_clients
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8000/api/clients/4/
+  body: json
+  auth: inherit
+}
+
+body:json {
+    {
+  
+      "phone_number": "9473227492"
+    }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

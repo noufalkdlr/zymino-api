@@ -12,7 +12,7 @@ class User(AbstractUser):
         return self.email
 
 
-class MemberProfile(models.Model):
+class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     phone_number = models.CharField(max_length=12, blank=True, null=True)
 

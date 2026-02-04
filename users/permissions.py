@@ -6,6 +6,13 @@ class IsSuperUser(permissions.BasePermission):
         return bool(request.user and request.user.is_superuser)
 
 
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.user and request.user.is_superuser:
+            return True
+        return obj.author == request.user
+
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     Object-level permission to only allow owners of an object to edit it.

@@ -11,7 +11,7 @@ class ClientSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ["id", "name"]
+        fields = ["id", "name", "category"]
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -19,3 +19,15 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ["id", "author", "tags", "client"]
         read_only_fields = ["author", "client"]
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Review
+        fields = [
+            "id",
+            "author",
+            "tags",
+        ]

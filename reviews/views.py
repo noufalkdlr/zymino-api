@@ -2,8 +2,13 @@ from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from .models import Client, Tag, Review
-from .serializers import ClientSerializer, TagSerializer, ReviewSerializer
-from users.permissions import IsSuperUser, IsOwnerOrReadOnly
+from .serializers import (
+    ClientSerializer,
+    TagSerializer,
+    ReviewSerializer,
+    ReviewListSerializer,
+)
+from users.permissions import IsSuperUser, IsOwner
 
 
 class ClientViewSet(viewsets.ModelViewSet):
@@ -42,7 +47,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated]
 
         elif self.action in ["retrieve", "destroy", "update", "partial_update"]:
-            permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+            permission_classes = [IsAuthenticated, IsOwner]
 
         else:
             permission_classes = [IsSuperUser]
@@ -52,6 +57,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         client_id = self.kwargs["client_id"]
         return Review.objects.filter(client__id=client_id)
+
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return ReviewListSerializer
+        return ReviewSerializer
 
     def perform_create(self, serializer):
         client_id = self.kwargs["client_id"]

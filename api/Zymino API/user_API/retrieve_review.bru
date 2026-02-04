@@ -1,0 +1,21 @@
+meta {
+  name: retrieve_review
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:8000/api/client/:client_id/reviews/:review_id/
+  body: none
+  auth: inherit
+}
+
+params:path {
+  client_id: 4
+  review_id: 1
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
