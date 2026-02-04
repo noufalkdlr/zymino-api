@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from users.models import User, UserProfile
 
@@ -17,7 +18,8 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         fields = ["user", "phone_number"]
 
     def create(self, validated_data):
-        user_data = validated_data.pop("user")
-        user = User.objects.create_user(**user_data)
-        profile = UserProfile.objects.create(user=user, **validated_data)
-        return profile
+        with transaction.atomic():
+            user_data = validated_data.pop("user")
+            user = User.objects.create_user(**user_data)
+            profile = UserProfile.objects.create(user=user, **validated_data)
+            return profile
