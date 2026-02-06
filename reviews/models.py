@@ -10,24 +10,37 @@ class Client(models.Model):
     phone_number = models.CharField(max_length=100, unique=True)
 
     def save(self, *args, **kwargs):
-        if self.phone_number.startswith("sha256$"):
-            super().save(*args, **kwargs)
-            return
+        if not self.phone_number.startswith("sha256$"):
+            try:
+                parsed_number = phonenumbers.parse(self.phone_number, "IN")
+                if not phonenumbers.is_valid_number(parsed_number):
+                    raise ValueError("Phone number is not valid")
 
-        try:
-            parsed_number = phonenumbers.parse(self.phone_number, None)
-            if phonenumbers.is_valid_number(parsed_number):
                 clean_number = phonenumbers.format_number(
                     parsed_number, phonenumbers.PhoneNumberFormat.E164
                 )
-                hashed_value = hashlib.sha256(clean_number.encode()).hexdigest()
+
+                if not hasattr(settings, "PHONE_HASH_SALT"):
+                    raise ValueError("PHONE_HASH_SALT not found in settings!")
+
+                salted_number = clean_number + settings.PHONE_HASH_SALT
+
+                hashed_value = hashlib.sha256(salted_number.encode()).hexdigest()
                 self.phone_number = f"sha256${hashed_value}"
-        except Exception as e:
-            raise ValueError(f"Invalid phone number format: {e}")
+
+            except phonenumbers.NumberParseException:
+                raise ValueError("Invalid phone number format")
+
+            except ValueError as ve:
+                raise ve
+
+            except Exception as e:
+                raise ValueError(f"Error processing number: {e}")
+
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.phone_number
+        return str(self.id)
 
 
 class Tag(models.Model):

@@ -9,11 +9,11 @@ router.register(r"tags", TagViewSet)
 urlpatterns = [
     path("", include(router.urls)),
     path(
-        "client/<int:client_id>/reviews/",
+        "client/<uuid:client_id>/reviews/",
         ReviewViewSet.as_view({"get": "list", "post": "create"}, name="client_review"),
     ),
     path(
-        "client/<int:client_id>/reviews/<int:pk>/",
+        "client/<uuid:client_id>/reviews/<int:pk>/",
         ReviewViewSet.as_view(
             {
                 "get": "retrieve",
