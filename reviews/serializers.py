@@ -30,6 +30,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         view = self.context.get("view")
 
         client_id = view.kwargs.get("client_id")  # type:ignore
+
         if request.method == "POST":  # type:ignore
             if Review.objects.filter(author=request.user, client__id=client_id):  # type:ignore
                 raise ValidationError(
