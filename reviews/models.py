@@ -50,5 +50,12 @@ class Review(models.Model):
     tags = models.ManyToManyField(Tag, related_name="reviews")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="reviews")
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["author", "client"], name="unique_review_per_client"
+            )
+        ]
+
     def __str__(self):
-        return str(self.client.id)
+        return f"{self.client} - {self.author}"

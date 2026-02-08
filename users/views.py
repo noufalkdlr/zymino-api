@@ -13,7 +13,7 @@ class CustomerSignupView(CreateAPIView):
         response = super().create(request, *args, **kwargs)
         return Response(
             {
-                "message": "Customer registered successfully!",
+                "message": "User registered successfully!",
                 "data": response.data,
             },
             status=status.HTTP_201_CREATED,
