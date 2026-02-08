@@ -1,18 +1,18 @@
 meta {
-  name: post_clients
+  name: client_lookup
   type: http
-  seq: 3
+  seq: 6
 }
 
 post {
-  url: http://localhost:8000/api/clients/
+  url: http://127.0.0.1:8000/api/client-lookup/
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "phone_number":"=918075027455"
+    "phone_number":"+919746469319"
   }
 }
 

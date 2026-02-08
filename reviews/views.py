@@ -1,4 +1,7 @@
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from .models import Client, Tag, Review
@@ -7,8 +10,11 @@ from .serializers import (
     TagSerializer,
     ReviewSerializer,
     ReviewListSerializer,
+    ClientLookupSerializer,
+    UserReviewListSerializer,
 )
 from users.permissions import IsSuperUser, IsOwner
+from .utils import hash_phone_number
 
 
 class ClientViewSet(viewsets.ModelViewSet):
@@ -22,6 +28,35 @@ class ClientViewSet(viewsets.ModelViewSet):
             permission_classes = [IsSuperUser]
 
         return [permission() for permission in permission_classes]
+
+
+class ClientLookupView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ClientLookupSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        phone_number = serializer["phone_number"]
+
+        try:
+            hashed_number = hash_phone_number(phone_number)
+            client = get_object_or_404(Client, phone_number=hashed_number)
+
+            return Response(
+                {"client id": client.id, "message": "Client found successfully"},
+                status=status.HTTP_200_OK,
+            )
+
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception:
+            return Response(
+                {"error": "client not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -46,9 +81,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "create"]:
             permission_classes = [IsAuthenticated]
 
-        elif self.action in ["retrieve", "destroy", "update", "partial_update"]:
-            permission_classes = [IsAuthenticated, IsOwner]
-
         else:
             permission_classes = [IsSuperUser]
 
@@ -67,3 +99,22 @@ class ReviewViewSet(viewsets.ModelViewSet):
         client_id = self.kwargs["client_id"]
         client = get_object_or_404(Client, id=client_id)
         return serializer.save(author=self.request.user, client=client)
+
+
+class UserReviewViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsOwner]
+    serializer_class = UserReviewListSerializer
+
+    def get_queryset(self):
+        return Review.objects.filter(author=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return UserReviewListSerializer
+        return ReviewSerializer
+
+    def create(self, request, *args, **kwargs):
+        return Response(
+            {"detail": "Use client endpoint to create reviews."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )

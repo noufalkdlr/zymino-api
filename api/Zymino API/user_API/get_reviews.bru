@@ -1,23 +1,17 @@
 meta {
-  name: post_reviews
+  name: get_reviews
   type: http
-  seq: 4
+  seq: 10
 }
 
-post {
+get {
   url: http://localhost:8000/api/client/:client_id/reviews/
-  body: json
+  body: none
   auth: inherit
 }
 
 params:path {
-  client_id: 4daf4f2b-73a2-4e1f-a618-7bdaefd1ff19
-}
-
-body:json {
-  {
-    "tags":[1]
-  }
+  client_id: bf58d7a6-5e05-4a1b-a100-a0c09a989f02
 }
 
 settings {

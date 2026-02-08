@@ -8,6 +8,10 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = ["id", "phone_number"]
 
 
+class ClientLookupSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=100, required=True)
+
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -23,11 +27,18 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class ReviewListSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
+    author = serializers.ReadOnlyField(source="author.username")
 
     class Meta:
         model = Review
-        fields = [
-            "id",
-            "author",
-            "tags",
-        ]
+        fields = ["id", "tags", "author"]
+
+
+class UserReviewListSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source="author.username")
+    tags = TagSerializer(many=True)
+    client = ClientSerializer()
+
+    class Meta:
+        model = Review
+        fields = ["id", "author", "tags", "client"]

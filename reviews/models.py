@@ -1,8 +1,8 @@
 import uuid
 import phonenumbers
-import hashlib
 from django.db import models
 from django.conf import settings
+from .utils import hash_phone_number
 
 
 class Client(models.Model):
@@ -12,22 +12,7 @@ class Client(models.Model):
     def save(self, *args, **kwargs):
         if not self.phone_number.startswith("sha256$"):
             try:
-                parsed_number = phonenumbers.parse(self.phone_number, "IN")
-                if not phonenumbers.is_valid_number(parsed_number):
-                    raise ValueError("Phone number is not valid")
-
-                clean_number = phonenumbers.format_number(
-                    parsed_number, phonenumbers.PhoneNumberFormat.E164
-                )
-
-                if not hasattr(settings, "PHONE_HASH_SALT"):
-                    raise ValueError("PHONE_HASH_SALT not found in settings!")
-
-                salted_number = clean_number + settings.PHONE_HASH_SALT
-
-                hashed_value = hashlib.sha256(salted_number.encode()).hexdigest()
-                self.phone_number = f"sha256${hashed_value}"
-
+                self.phone_number = hash_phone_number(self.phone_number)
             except phonenumbers.NumberParseException:
                 raise ValueError("Invalid phone number format")
 
@@ -66,4 +51,4 @@ class Review(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="reviews")
 
     def __str__(self):
-        return self.client.phone_number
+        return str(self.client.id)
