@@ -35,6 +35,9 @@ class Tag(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
     category = models.CharField(max_length=20, choices=TagCategory.choices)
+    group = models.CharField(
+        max_length=50, help_text="Tags with the same group are mutually exclusive"
+    )
 
     def __str__(self):
         return self.name

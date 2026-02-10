@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from .models import Client, Tag, Review
 
 
@@ -16,7 +15,7 @@ class ClientLookupSerializer(serializers.Serializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ["id", "name", "category"]
+        fields = ["id", "name", "category", "group"]
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -24,6 +23,20 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ["id", "author", "tags", "client"]
         read_only_fields = ["author", "client"]
+
+    def validate_tags(self, tags):
+        groups = []
+        for tag in tags:
+            groups.append(tag.group)
+
+        if len(groups) != len(set(groups)):
+            seen = set()
+            duplicates = set(x for x in groups if x in seen or seen.add(x))
+            raise serializers.ValidationError(
+                f"You cannot select conflicting tags from the same category: {', '.join(duplicates)}"
+            )
+
+        return tags
 
     def validate(self, attrs):
         request = self.context.get("request")
@@ -33,7 +46,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
         if request.method == "POST":  # type:ignore
             if Review.objects.filter(author=request.user, client__id=client_id):  # type:ignore
-                raise ValidationError(
+                raise serializers.ValidationError(
                     {"detail": "You have already reviewed this client!"}
                 )
 
