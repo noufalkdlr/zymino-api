@@ -37,7 +37,7 @@ PHONE_HASH_SALT = os.environ.get("PHONE_HASH_SALT")
 if not PHONE_HASH_SALT:
     raise ValueError("FATAL ERROR: PHONE_HASH_SALT is missing in .env file!")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["l", "localhost", "127.0.0.1"]
 
 
 # Application definition
