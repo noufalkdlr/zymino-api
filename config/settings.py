@@ -37,7 +37,7 @@ PHONE_HASH_SALT = os.environ.get("PHONE_HASH_SALT")
 if not PHONE_HASH_SALT:
     raise ValueError("FATAL ERROR: PHONE_HASH_SALT is missing in .env file!")
 
-ALLOWED_HOSTS = ["l", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
     "users",
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
