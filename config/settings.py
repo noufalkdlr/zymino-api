@@ -38,7 +38,7 @@ if not PHONE_HASH_SALT:
     raise ValueError("FATAL ERROR: PHONE_HASH_SALT is missing in .env file!")
 
 ALLOWED_HOSTS = []
-
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
