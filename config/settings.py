@@ -39,6 +39,7 @@ if not PHONE_HASH_SALT:
 
 ALLOWED_HOSTS = []
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -52,7 +53,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
-    # "rest_framework_simplejwt.token_blacklist",
+    "rest_framework_simplejwt.token_blacklist",
     "users",
     "reviews",
 ]
@@ -144,7 +145,7 @@ AUTH_USER_MODEL = "users.User"
 # REST Framework settings
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "users.authentication.MultiPlatformJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
