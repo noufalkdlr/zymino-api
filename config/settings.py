@@ -184,5 +184,17 @@ SPECTACULAR_SETTINGS = {
             "name": "Authentication",
             "description": "APIs for user login, logout, and token management",
         },
+        {
+            "name": "Tags",
+            "description": "APIs for managing review tags. These tags (e.g., 'Good Service', 'High Price') are pre-defined by the admin and selected by users during the review process.",
+        },
+        {
+            "name": "Clients",
+            "description": "APIs for managing clients (businesses/entities) that are being reviewed. Users can create new clients or view existing ones, while administrative tasks are restricted to superusers.",
+        },
+        {
+            "name": "Reviews",
+            "description": "APIs for posting and managing reviews. Includes general client reviews and user-specific review management.",
+        },
     ],
 }
