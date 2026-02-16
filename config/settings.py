@@ -179,4 +179,10 @@ SPECTACULAR_SETTINGS = {
         }
     },
     "SECURITY": [{"bearerAuth": []}],
+    "TAGS": [
+        {
+            "name": "Authentication",
+            "description": "APIs for user login, logout, and token management",
+        },
+    ],
 }
