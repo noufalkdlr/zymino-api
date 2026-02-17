@@ -1,0 +1,26 @@
+meta {
+  name: post_reviews
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8000/api/client/:client_id/reviews/
+  body: json
+  auth: inherit
+}
+
+params:path {
+  client_id: acc2d0e6-4043-41ea-83e4-eecdac890e2b
+}
+
+body:json {
+  {
+    "tags":[2]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

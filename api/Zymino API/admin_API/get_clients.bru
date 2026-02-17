@@ -1,0 +1,16 @@
+meta {
+  name: get_clients
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8000/api/clients/
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

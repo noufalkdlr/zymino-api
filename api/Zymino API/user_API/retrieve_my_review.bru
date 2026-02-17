@@ -1,0 +1,26 @@
+meta {
+  name: retrieve_my_review
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://127.0.0.1:8000/api/my-reviews/:review_id/
+  body: json
+  auth: inherit
+}
+
+params:path {
+  review_id: 19
+}
+
+body:json {
+  {
+    "tags":[2]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

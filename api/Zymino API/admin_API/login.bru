@@ -1,0 +1,33 @@
+meta {
+  name: login
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8000/api/login/
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email":"noufal@email.com",
+    "password":"noufal",
+    "platform":"mobile"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  
+  if (body.access) {
+    bru.setEnvVar("admin_token", body.access);
+    console.log("Admin Token Updated! ✅");
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

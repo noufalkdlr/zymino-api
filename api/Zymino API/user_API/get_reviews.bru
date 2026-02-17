@@ -1,0 +1,20 @@
+meta {
+  name: get_reviews
+  type: http
+  seq: 10
+}
+
+get {
+  url: http://localhost:8000/api/client/:client_id/reviews/
+  body: none
+  auth: inherit
+}
+
+params:path {
+  client_id: bf58d7a6-5e05-4a1b-a100-a0c09a989f02
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

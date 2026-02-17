@@ -1,0 +1,29 @@
+meta {
+  name: retrieve_review
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:8000/api/client/:client_id/reviews/:review_id/
+  body: json
+  auth: inherit
+}
+
+params:path {
+  client_id: 40d493a5-bdc8-40e8-96bc-1e4b9c6590ca
+  review_id: 5
+}
+
+body:json {
+  {
+    "tags": [
+      3,2
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
