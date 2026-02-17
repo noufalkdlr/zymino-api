@@ -1,0 +1,63 @@
+meta {
+  name: Get reviews for a client
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/client/:client_id/reviews/
+  body: none
+  auth: bearer
+}
+
+params:path {
+  client_id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/client/:client_id/reviews/
+    method: GET
+    mode: none
+    params:path: {
+      client_id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": 0,
+            "tags": [
+              {
+                "id": 0,
+                "name": "",
+                "category": "",
+                "group": ""
+              }
+            ],
+            "author": ""
+          }
+        ]
+      '''
+    }
+  }
+}

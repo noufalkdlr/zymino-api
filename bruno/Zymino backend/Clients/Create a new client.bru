@@ -1,0 +1,59 @@
+meta {
+  name: Create a new client
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/clients/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": "",
+    "phone_number": "+919447441339"
+  }
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/api/clients/
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "id": "",
+        "phone_number": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "",
+          "phone_number": ""
+        }
+      '''
+    }
+  }
+}

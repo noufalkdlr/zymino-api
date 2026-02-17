@@ -1,0 +1,60 @@
+meta {
+  name: List my reviews
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/my-reviews/
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/my-reviews/
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": 0,
+            "author": "",
+            "tags": [
+              {
+                "id": 0,
+                "name": "",
+                "category": "",
+                "group": ""
+              }
+            ],
+            "client": {
+              "id": "",
+              "phone_number": ""
+            }
+          }
+        ]
+      '''
+    }
+  }
+}

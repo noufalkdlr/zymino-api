@@ -1,0 +1,48 @@
+meta {
+  name: List all clients (Superuser only)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/clients/
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/clients/
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": "",
+            "phone_number": ""
+          }
+        ]
+      '''
+    }
+  }
+}

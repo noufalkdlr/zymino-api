@@ -1,0 +1,47 @@
+meta {
+  name: Delete my review
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{baseUrl}}/api/my-reviews/:id/
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 204 Response
+  description: No response body
+  
+  request: {
+    url: {{baseUrl}}/api/my-reviews/:id/
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

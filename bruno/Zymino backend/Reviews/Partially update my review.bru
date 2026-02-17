@@ -1,0 +1,73 @@
+meta {
+  name: Partially update my review
+  type: http
+  seq: 10
+}
+
+patch {
+  url: {{baseUrl}}/api/my-reviews/:id/
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": 0,
+    "author": 0,
+    "tags": [],
+    "client": ""
+  }
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/my-reviews/:id/
+    method: PATCH
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "id": 0,
+        "author": 0,
+        "tags": [],
+        "client": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 0,
+          "author": 0,
+          "tags": [],
+          "client": ""
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,77 @@
+meta {
+  name: User Registration / Sign Up
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/signup/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "user": {
+      "id": 0,
+      "email": "",
+      "username": "",
+      "password": ""
+    },
+    "phone_number": ""
+  }
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/api/signup/
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "user": {
+          "id": 0,
+          "email": "",
+          "username": "",
+          "password": ""
+        },
+        "phone_number": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "",
+          "data": {
+            "user": {
+              "id": 0,
+              "email": "",
+              "username": "",
+              "password": ""
+            },
+            "phone_number": ""
+          }
+        }
+      '''
+    }
+  }
+}

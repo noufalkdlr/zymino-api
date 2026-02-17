@@ -1,0 +1,47 @@
+meta {
+  name: Remove a tag from the system
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/tags/:id/
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 204 Response
+  description: No response body
+  
+  request: {
+    url: {{baseUrl}}/api/tags/:id/
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

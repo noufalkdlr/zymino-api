@@ -1,0 +1,67 @@
+meta {
+  name: Update client details (Superuser only)
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/clients/:id/
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": "",
+    "phone_number": ""
+  }
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/clients/:id/
+    method: PUT
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "id": "",
+        "phone_number": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "",
+          "phone_number": ""
+        }
+      '''
+    }
+  }
+}

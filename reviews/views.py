@@ -76,7 +76,7 @@ class ClientViewSet(viewsets.ModelViewSet):
         ),
         404: inline_serializer(
             name="LookupErrorResponse",
-            fields={"error": serializers.CharField(default="client not found")},
+            fields={"error": serializers.CharField(default="Client not found")},
         ),
     },
 )
@@ -143,53 +143,31 @@ class TagViewSet(viewsets.ModelViewSet):
         tags=["Reviews"],
         summary="Get reviews for a client",
         description="Retrieve all reviews associated with a specific client.",
-        parameters=[
-            OpenApiParameter("client_id", str, OpenApiParameter.PATH, description="The unique ID of the client.")
-        ],
     ),
     create=extend_schema(
         tags=["Reviews"],
         summary="Post a review for a client",
         description="Submit a new review for a specific client.",
-        parameters=[
-            OpenApiParameter("client_id", str, OpenApiParameter.PATH, description="The unique ID of the client.")
-        ],
     ),
     retrieve=extend_schema(
         tags=["Reviews"],
         summary="Get details of a specific review",
         description="Fetch full details of a specific review.",
-        parameters=[
-            OpenApiParameter("client_id", str, OpenApiParameter.PATH, description="ID of the client"),
-            OpenApiParameter("pk", int, OpenApiParameter.PATH, description="Primary Key (ID) of the review") # 👈 'id' ന് പകരം 'pk'
-        ]
     ),
     update=extend_schema(
         tags=["Reviews"],
         summary="Update a review (Superuser only)",
         description="Completely update a review's content.",
-        parameters=[
-            OpenApiParameter("client_id", str, OpenApiParameter.PATH, description="ID of the client"),
-            OpenApiParameter("pk", int, OpenApiParameter.PATH, description="Primary Key (ID) of the review") # 👈 'pk'
-        ]
     ),
     partial_update=extend_schema(
         tags=["Reviews"],
         summary="Partially update a review (Superuser only)",
         description="Update specific fields of a review.",
-        parameters=[
-            OpenApiParameter("client_id", str, OpenApiParameter.PATH, description="ID of the client"),
-            OpenApiParameter("pk", int, OpenApiParameter.PATH, description="Primary Key (ID) of the review") # 👈 'pk'
-        ]
     ),
     destroy=extend_schema(
         tags=["Reviews"],
         summary="Delete a review (Superuser only)",
         description="Permanently remove a review from the system.",
-        parameters=[
-            OpenApiParameter("client_id", str, OpenApiParameter.PATH, description="ID of the client"),
-            OpenApiParameter("pk", int, OpenApiParameter.PATH, description="Primary Key (ID) of the review") # 👈 'pk'
-        ]
     ),
 )
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -220,38 +198,34 @@ class ReviewViewSet(viewsets.ModelViewSet):
         client = get_object_or_404(Client, id=client_id)
         return serializer.save(author=self.request.user, client=client)
 
+
 @extend_schema_view(
     list=extend_schema(
         tags=["Reviews"],
         summary="List my reviews",
-        description="Retrieve a list of all reviews written by the currently authenticated user."
+        description="Retrieve a list of all reviews written by the currently authenticated user.",
     ),
     retrieve=extend_schema(
-        tags=["Reviews"], 
+        tags=["Reviews"],
         summary="Get details of my review",
         description="Fetch the full details of a specific review owned by the user.",
-        parameters=[OpenApiParameter("id", int, OpenApiParameter.PATH)]
-        
     ),
     update=extend_schema(
-        tags=["Reviews"], 
+        tags=["Reviews"],
         summary="Update my review",
         description="Completely update an existing review. Only the owner can perform this action.",
-        parameters=[OpenApiParameter("id", int, OpenApiParameter.PATH)]
     ),
     partial_update=extend_schema(
-        tags=["Reviews"], 
+        tags=["Reviews"],
         summary="Partially update my review",
         description="Update specific fields of an existing review.",
-        parameters=[OpenApiParameter("id", int, OpenApiParameter.PATH)]
     ),
     destroy=extend_schema(
-        tags=["Reviews"], 
+        tags=["Reviews"],
         summary="Delete my review",
         description="Remove a review permanently from the system.",
-        parameters=[OpenApiParameter("id", int, OpenApiParameter.PATH)]
     ),
-    create=extend_schema(exclude=True)
+    create=extend_schema(exclude=True),
 )
 class UserReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwner]

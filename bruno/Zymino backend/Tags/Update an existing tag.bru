@@ -1,0 +1,73 @@
+meta {
+  name: Update an existing tag
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/tags/:id/
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": 0,
+    "name": "",
+    "category": "",
+    "group": ""
+  }
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/tags/:id/
+    method: PUT
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "id": 0,
+        "name": "",
+        "category": "",
+        "group": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 0,
+          "name": "",
+          "category": "",
+          "group": ""
+        }
+      '''
+    }
+  }
+}

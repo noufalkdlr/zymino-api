@@ -1,0 +1,63 @@
+meta {
+  name: Get details of a specific review
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/client/:client_id/reviews/:id/
+  body: none
+  auth: bearer
+}
+
+params:path {
+  client_id: 
+  id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/client/:client_id/reviews/:id/
+    method: GET
+    mode: none
+    params:path: {
+      client_id: 
+      id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 0,
+          "tags": [
+            {
+              "id": 0,
+              "name": "",
+              "category": "",
+              "group": ""
+            }
+          ],
+          "author": ""
+        }
+      '''
+    }
+  }
+}

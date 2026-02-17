@@ -107,7 +107,6 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @extend_schema_view(
     post=extend_schema(
         tags=["Authentication"],
@@ -116,44 +115,46 @@ class LoginView(APIView):
         request=inline_serializer(
             name="LogoutRequest",
             fields={
-                "refresh": serializers.CharField(required=False, help_text="Provide refresh token for mobile platform")
-            }
+                "refresh": serializers.CharField(
+                    required=False,
+                    help_text="Provide refresh token for mobile platform",
+                )
+            },
         ),
-        responses={200: dict}
+        responses={200: dict},
     )
-)   
+)
 class LogoutView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
-        
+
         if not refresh_token:
             refresh_token = request.COOKIES.get("refresh_token")
-        
+
         if not refresh_token:
             return Response(
-                {"error": "Refresh token is required to logout"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Refresh token is required to logout"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
-            
+
             response = Response(
-                {"message": "Successfully logged out"}, 
-                status=status.HTTP_200_OK
+                {"message": "Successfully logged out"}, status=status.HTTP_200_OK
             )
             response.delete_cookie("access_token")
             response.delete_cookie("refresh_token")
             return response
-            
+
         except Exception:
             return Response(
-                {"error": "Invalid or expired token"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Invalid or expired token"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -166,9 +167,11 @@ class LogoutView(APIView):
             name="TokenRefreshRequest",
             fields={
                 "refresh": serializers.CharField(required=False),
-                "platform": serializers.ChoiceField(choices=["web", "mobile"], required=False, default="mobile")
-            }
-        )
+                "platform": serializers.ChoiceField(
+                    choices=["web", "mobile"], required=False, default="mobile"
+                ),
+            },
+        ),
     )
 )
 class CustomTokenRefreshView(TokenRefreshView):

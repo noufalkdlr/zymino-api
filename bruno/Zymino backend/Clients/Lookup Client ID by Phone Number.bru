@@ -1,0 +1,92 @@
+meta {
+  name: Lookup Client ID by Phone Number
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/client-lookup/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "phone_number": "+919447441339"
+  }
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/client-lookup/
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "phone_number": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "client_id": "",
+          "message": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  
+  request: {
+    url: {{baseUrl}}/api/client-lookup/
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "phone_number": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error": ""
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,59 @@
+meta {
+  name: Refresh Access Token
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/token/refresh/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "refresh": "",
+    "platform": ""
+  }
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/token/refresh/
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "refresh": "",
+        "platform": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "access": "",
+          "refresh": ""
+        }
+      '''
+    }
+  }
+}

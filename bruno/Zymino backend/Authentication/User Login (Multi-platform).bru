@@ -1,0 +1,55 @@
+meta {
+  name: User Login (Multi-platform)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/login/
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "email": "noufal@email.com",
+    "password": "noufal",
+    "platform": "web"
+  }
+}
+
+example {
+  name: 200 Response
+  description: No response body
+  
+  request: {
+    url: {{baseUrl}}/api/login/
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "email": "",
+        "password": "",
+        "platform": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

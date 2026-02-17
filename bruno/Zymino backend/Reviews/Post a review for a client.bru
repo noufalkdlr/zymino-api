@@ -1,0 +1,73 @@
+meta {
+  name: Post a review for a client
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/client/:client_id/reviews/
+  body: json
+  auth: bearer
+}
+
+params:path {
+  client_id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": 0,
+    "author": 0,
+    "tags": [],
+    "client": ""
+  }
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/api/client/:client_id/reviews/
+    method: POST
+    mode: json
+    params:path: {
+      client_id: 
+    }
+  
+    body:json: {
+      {
+        "id": 0,
+        "author": 0,
+        "tags": [],
+        "client": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 0,
+          "author": 0,
+          "tags": [],
+          "client": ""
+        }
+      '''
+    }
+  }
+}

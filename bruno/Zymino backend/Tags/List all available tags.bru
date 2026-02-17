@@ -1,0 +1,50 @@
+meta {
+  name: List all available tags
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/tags/
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/tags/
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "id": 0,
+            "name": "",
+            "category": "",
+            "group": ""
+          }
+        ]
+      '''
+    }
+  }
+}

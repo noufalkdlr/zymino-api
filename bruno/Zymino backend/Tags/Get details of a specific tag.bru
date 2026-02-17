@@ -1,0 +1,55 @@
+meta {
+  name: Get details of a specific tag
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/tags/:id/
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/api/tags/:id/
+    method: GET
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": 0,
+          "name": "",
+          "category": "",
+          "group": ""
+        }
+      '''
+    }
+  }
+}
