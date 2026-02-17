@@ -22,6 +22,42 @@ body:json {
   }
 }
 
+script:post-response {
+  const reqBody = req.getBody();
+  const resBody = res.getBody();
+  
+  if (reqBody && reqBody.platform === "web") {
+      
+      const setCookieHeaders = res.getHeader("set-cookie");
+      let tokenFromCookie = "";
+  
+      if (setCookieHeaders) {
+         
+          const cookies = Array.isArray(setCookieHeaders) ? setCookieHeaders : [setCookieHeaders];
+          
+          for (let cookieStr of cookies) {
+            
+              if (cookieStr.startsWith("access_token=")) {
+               
+                  tokenFromCookie = cookieStr.split(";")[0].replace("access_token=", "");
+                  break;
+              }
+          }
+      }
+  
+    
+      if (tokenFromCookie) {
+          bru.setEnvVar("token", tokenFromCookie);
+      }
+  
+  } else {
+      
+      if (resBody && resBody.access) {
+          bru.setEnvVar("token", resBody.access);
+      }
+  }
+}
+
 example {
   name: 200 Response
   description: No response body
