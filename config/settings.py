@@ -37,7 +37,7 @@ PHONE_HASH_SALT = os.environ.get("PHONE_HASH_SALT")
 if not PHONE_HASH_SALT:
     raise ValueError("FATAL ERROR: PHONE_HASH_SALT is missing in .env file!")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.31.117", "127.0.0.1", "localhost"]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
