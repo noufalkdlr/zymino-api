@@ -7,28 +7,16 @@ from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
-from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
 from .serializers import UserSignUpSerializer, UserLoginSerializer, UserSerializer
-
-
-@extend_schema_view(
-    post=extend_schema(
-        tags=["Authentication"],
-        summary="User Registration / Sign Up",
-        description="Registers a new user in the system.",
-        responses={
-            201: inline_serializer(
-                name="SignupResponse",
-                fields={
-                    "message": serializers.CharField(
-                        default="User registered successfully!"
-                    ),
-                    "data": UserSignUpSerializer(),
-                },
-            )
-        },
-    )
+from .schema import (
+    USER_LOGIN_SCHEMA,
+    USER_LOGOUT_SCHEMA,
+    USER_SIGNUP_SCHEMA,
+    TOKEN_REFRESH_SCHEMA,
 )
+
+
+@USER_SIGNUP_SCHEMA
 class UserSignupView(CreateAPIView):
     serializer_class = UserSignUpSerializer
     permission_classes = [AllowAny]
@@ -44,17 +32,7 @@ class UserSignupView(CreateAPIView):
         )
 
 
-@extend_schema_view(
-    post=extend_schema(
-        tags=["Authentication"],
-        summary="User Login (Multi-platform)",
-        description="Authenticates the user using their credentials. \n\n"
-        "**Token Delivery:**\n"
-        "* If platform is `web`: JWT tokens are set securely as HttpOnly cookies.\n"
-        "* If platform is `mobile` (default): JWT tokens are returned directly in the JSON response.",
-        request=UserLoginSerializer,
-    )
-)
+@USER_LOGIN_SCHEMA
 class LoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -110,23 +88,7 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@extend_schema_view(
-    post=extend_schema(
-        tags=["Authentication"],
-        summary="User Logout",
-        description="Logs out the user by blacklisting their refresh token. If platform is `web`, the token is automatically taken from the cookies.",
-        request=inline_serializer(
-            name="LogoutRequest",
-            fields={
-                "refresh": serializers.CharField(
-                    required=False,
-                    help_text="Provide refresh token for mobile platform",
-                )
-            },
-        ),
-        responses={200: dict},
-    )
-)
+@USER_LOGOUT_SCHEMA
 class LogoutView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -161,22 +123,7 @@ class LogoutView(APIView):
             )
 
 
-@extend_schema_view(
-    post=extend_schema(
-        tags=["Authentication"],
-        summary="Refresh Access Token",
-        description="Generates a new access token using a valid refresh token. Platform defaults to `mobile`.",
-        request=inline_serializer(
-            name="TokenRefreshRequest",
-            fields={
-                "refresh": serializers.CharField(required=False),
-                "platform": serializers.ChoiceField(
-                    choices=["web", "mobile"], required=False, default="mobile"
-                ),
-            },
-        ),
-    )
-)
+@TOKEN_REFRESH_SCHEMA
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.data.get("refresh")
