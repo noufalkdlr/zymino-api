@@ -24,6 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+# --- CORE SETTINGS ---
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
@@ -32,24 +33,34 @@ if not SECRET_KEY:
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-PHONE_HASH_SALT = os.environ.get("PHONE_HASH_SALT")
 
+# --- SECURITY & CUSTOM SETTINGS ---
+PHONE_HASH_SALT = os.environ.get("PHONE_HASH_SALT")
 if not PHONE_HASH_SALT:
     raise ValueError("FATAL ERROR: PHONE_HASH_SALT is missing in .env file!")
 
-ALLOWED_HOSTS = ["192.168.31.117", "127.0.0.1", "localhost"]
+ADMIN_URL = os.environ.get("ADMIN_URL", "admin")
+
+
+# --- COOKIE SETTINGS ---
+COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN", None)
+
+
+# --- NETWORK & CORS SETTINGS ---
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS", "192.168.31.117,127.0.0.1,localhost"
+).split(",")
+
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+if CORS_ALLOWED_ORIGINS == [""]:
+    CORS_ALLOWED_ORIGINS = []
+
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
+if CSRF_TRUSTED_ORIGINS == [""]:
+    CSRF_TRUSTED_ORIGINS = []
+
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-    "http://192.168.31.117:8081",
-]
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-    "http://192.168.31.117:8081",
-]
 
 # Application definition
 

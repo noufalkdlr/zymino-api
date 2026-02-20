@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -82,15 +83,17 @@ class LoginView(APIView):
                     key="access_token",
                     value=access_token,
                     httponly=True,
-                    secure=True,
-                    samesite="Strict",
+                    secure=not settings.DEBUG,
+                    samesite="Lax",
+                    domain=settings.COOKIE_DOMAIN,
                 )
                 response.set_cookie(
                     key="refresh_token",
                     value=str(refresh),
                     httponly=True,
-                    secure=True,
-                    samesite="Strict",
+                    secure=not settings.DEBUG,
+                    samesite="Lax",
+                    domain=settings.COOKIE_DOMAIN,
                 )
             else:
                 response = Response(
@@ -147,8 +150,8 @@ class LogoutView(APIView):
             response = Response(
                 {"message": "Successfully logged out"}, status=status.HTTP_200_OK
             )
-            response.delete_cookie("access_token")
-            response.delete_cookie("refresh_token")
+            response.delete_cookie("access_token", domain=settings.COOKIE_DOMAIN)
+            response.delete_cookie("refresh_token", domain=settings.COOKIE_DOMAIN)
             return response
 
         except Exception:
@@ -214,15 +217,17 @@ class CustomTokenRefreshView(TokenRefreshView):
                 "access_token",
                 access_token,
                 httponly=True,
-                secure=True,
-                samesite="Strict",
+                secure=not settings.DEBUG,
+                samesite="Lax",
+                domain=settings.COOKIE_DOMAIN,
             )
             response.set_cookie(
                 "refresh_token",
                 new_refresh_token,
                 httponly=True,
-                secure=True,
-                samesite="Strict",
+                secure=not settings.DEBUG,
+                samesite="Lax",
+                domain=settings.COOKIE_DOMAIN,
             )
         else:
             response = Response(
