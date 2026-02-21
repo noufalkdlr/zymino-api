@@ -1,15 +1,19 @@
 from django.conf import settings
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
-from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
-from .serializers import UserSignUpSerializer, UserLoginSerializer, UserSerializer
+from .serializers import (
+    UserDetailSerializer,
+    UserLoginSerializer,
+    UserProfileSerializer,
+)
 from .schema import (
     USER_LOGIN_SCHEMA,
+    USER_PROFILE_SCHEMA,
     USER_LOGOUT_SCHEMA,
     USER_SIGNUP_SCHEMA,
     TOKEN_REFRESH_SCHEMA,
@@ -18,7 +22,7 @@ from .schema import (
 
 @USER_SIGNUP_SCHEMA
 class UserSignupView(CreateAPIView):
-    serializer_class = UserSignUpSerializer
+    serializer_class = UserDetailSerializer
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
@@ -30,6 +34,15 @@ class UserSignupView(CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+@USER_PROFILE_SCHEMA
+class UserProfileView(RetrieveUpdateAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile  # type: ignore
 
 
 @USER_LOGIN_SCHEMA
@@ -53,7 +66,7 @@ class LoginView(APIView):
                 response = Response(
                     {
                         "message": "login successful",
-                        "user": UserSerializer(user).data,
+                        "user": UserDetailSerializer(user).data,
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -77,7 +90,7 @@ class LoginView(APIView):
                 response = Response(
                     {
                         "message": "login successful",
-                        "user": UserSerializer(user).data,
+                        "user": UserDetailSerializer(user).data,
                         "access": access_token,
                         "refresh": str(refresh),
                     },

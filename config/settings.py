@@ -206,6 +206,10 @@ SPECTACULAR_SETTINGS = {
             "description": "APIs for user login, logout, and token management",
         },
         {
+            "name": "Users",
+            "description": "APIs for managing user profiles and account-related information.",
+        },
+        {
             "name": "Tags",
             "description": "APIs for managing review tags. These tags (e.g., 'Good Service', 'High Price') are pre-defined by the admin and selected by users during the review process.",
         },

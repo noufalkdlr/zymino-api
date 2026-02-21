@@ -14,7 +14,9 @@ class User(AbstractUser):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    phone_number = models.CharField(max_length=12, blank=True, null=True)
+    full_name = models.CharField(max_length=200, blank=True, default="")
+    phone_number = models.CharField(max_length=20, blank=True, default="")
+    job_title = models.CharField(max_length=100, blank=True, default="")
 
     def __str__(self):
         return self.user.email

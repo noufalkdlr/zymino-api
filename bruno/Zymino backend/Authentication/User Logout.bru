@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/logout/
+  url: {{baseUrl}}/api/users/logout/
   body: json
   auth: bearer
 }
@@ -24,7 +24,7 @@ example {
   name: 200 Response
   
   request: {
-    url: {{baseUrl}}/api/logout/
+    url: {{baseUrl}}/api/users/logout/
     method: POST
     mode: json
     body:json: {

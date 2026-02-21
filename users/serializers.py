@@ -1,29 +1,37 @@
 from django.db import transaction
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from users.models import User, UserProfile
+from .models import User, UserProfile
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "email", "username", "password"]
         extra_kwargs = {"password": {"write_only": True}}
 
+    def create(self, validated_data):
+        with transaction.atomic():
+            user = User.objects.create_user(**validated_data)
+            UserProfile.objects.create(user=user)
+            return user
 
-class UserSignUpSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source="user.email", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
 
     class Meta:
         model = UserProfile
-        fields = ["user", "phone_number"]
-
-    def create(self, validated_data):
-        with transaction.atomic():
-            user_data = validated_data.pop("user")
-            user = User.objects.create_user(**user_data)
-            profile = UserProfile.objects.create(user=user, **validated_data)
-            return profile
+        fields = [
+            "user_id",
+            "email",
+            "username",
+            "full_name",
+            "phone_number",
+            "job_title",
+        ]
 
 
 class UserLoginSerializer(serializers.Serializer):

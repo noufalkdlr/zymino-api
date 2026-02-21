@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/signup/
+  url: {{baseUrl}}/api/users/signup/
   body: json
   auth: bearer
 }
@@ -16,13 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "user": {
-      "id": 0,
-      "email": "",
-      "username": "",
-      "password": ""
-    },
-    "phone_number": ""
+    "id": 0,
+    "email": "",
+    "username": "",
+    "password": ""
   }
 }
 
@@ -30,18 +27,15 @@ example {
   name: 201 Response
   
   request: {
-    url: {{baseUrl}}/api/signup/
+    url: {{baseUrl}}/api/users/signup/
     method: POST
     mode: json
     body:json: {
       {
-        "user": {
-          "id": 0,
-          "email": "",
-          "username": "",
-          "password": ""
-        },
-        "phone_number": ""
+        "id": 0,
+        "email": "",
+        "username": "",
+        "password": ""
       }
     }
   }
@@ -62,13 +56,10 @@ example {
         {
           "message": "",
           "data": {
-            "user": {
-              "id": 0,
-              "email": "",
-              "username": "",
-              "password": ""
-            },
-            "phone_number": ""
+            "id": 0,
+            "email": "",
+            "username": "",
+            "password": ""
           }
         }
       '''

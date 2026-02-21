@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
-from .serializers import UserSignUpSerializer, UserLoginSerializer, UserSerializer
+from .serializers import UserDetailSerializer, UserLoginSerializer
 
 
 USER_SIGNUP_SCHEMA = extend_schema_view(
@@ -15,11 +15,29 @@ USER_SIGNUP_SCHEMA = extend_schema_view(
                     "message": serializers.CharField(
                         default="User registered successfully!"
                     ),
-                    "data": UserSignUpSerializer(),
+                    "data": UserDetailSerializer(),
                 },
             )
         },
     )
+)
+
+USER_PROFILE_SCHEMA = extend_schema_view(
+    get=extend_schema(
+        tags=["Users"],
+        summary="Get User Profile",
+        description="Retrieves the profile information of the currently authenticated user.",
+    ),
+    patch=extend_schema(
+        tags=["Users"],
+        summary="Partial Update User Profile",
+        description="Updates specific fields of the user's profile.",
+    ),
+    put=extend_schema(
+        tags=["Users"],
+        summary="Update User Profile",
+        description="Updates the entire profile of the user.",
+    ),
 )
 
 USER_LOGIN_SCHEMA = extend_schema_view(
