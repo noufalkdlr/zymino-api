@@ -1,16 +1,6 @@
-from typing import Any
+def a(z, t):
+    return z, t
 
-attrs: dict[str, Any] = {
-    "email": "noufal@zymino.com",
-    "password": "mypassword123",
-    "platform": "mobile",
-}
-user = {
-    "id": 1,
-    "email": "noufal@zymino.com",
-    "password": "mypassword123",
-    "isActive": True,
-}
-attrs["user"] = user
 
-print(attrs)
+y = a("hai", True)
+print(y)

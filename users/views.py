@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
+from .models import UserProfile
 from .serializers import (
     UserDetailSerializer,
     UserLoginSerializer,
@@ -42,7 +43,8 @@ class UserProfileView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user.profile  # type: ignore
+        profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
 
 
 @USER_LOGIN_SCHEMA
