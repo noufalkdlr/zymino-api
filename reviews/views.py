@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import serializers
 from users.permissions import IsSuperUser, IsOwner
 from .models import Client, Tag, Review
 from .utils import hash_phone_number
@@ -81,7 +80,6 @@ class ClientLookupView(APIView):
             return Response(
                 {"error": "client not found"}, status=status.HTTP_404_NOT_FOUND
             )
-
 
 
 @REVIEW_VIEWSET_SCHEMA
