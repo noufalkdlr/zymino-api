@@ -4,19 +4,21 @@ from django.db import transaction
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import User, UserProfile
+from .utils import generate_unique_referral_code
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    referral_code_input = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
-        fields = ["id", "email", "username", "password"]
+        fields = ["id", "email", "username", "password", "referral_code_input"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         with transaction.atomic():
             user = User.objects.create_user(**validated_data)
-            username = user.username
-            referral_code = f"{username.upper()}{random.randint(1000, 9999)}"
+            referral_code = generate_unique_referral_code(user.username)
             UserProfile.objects.create(user=user, referral_code=referral_code)
             return user
 

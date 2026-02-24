@@ -1,4 +1,10 @@
-a = "noufal"
+import secrets
+import string
+import random
 
-b = a.upper()
-print(b)
+# കൂടുതൽ സുരക്ഷിതമായ രീതി:
+suffix = "".join(
+    random.choice(string.ascii_uppercase + string.digits) for _ in range(6)
+)
+
+print(suffix)
