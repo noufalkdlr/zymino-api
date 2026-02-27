@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.permissions import IsSuperUser, IsOwner
 from .models import Client, Tag, Review
 from .utils import hash_phone_number
+from users.models import UserProfile
 from .serializers import (
     ClientSerializer,
     TagSerializer,
@@ -109,6 +110,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         client_id = self.kwargs["client_id"]
         client = get_object_or_404(Client, id=client_id)
+
         return serializer.save(author=self.request.user, client=client)
 
 

@@ -1,0 +1,11 @@
+services:
+  web:
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app # Sync local code changes to the container immediately for development
+    ports:
+      - "8000:8000"
+
+  nginx:
+    volumes:
+      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro

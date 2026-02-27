@@ -10,21 +10,17 @@ meta {
 post {
   url: {{baseUrl}}/api/users/signup/
   body: json
-  auth: bearer
-}
-
-auth:bearer {
-  token: {{token}}
+  auth: none
 }
 
 body:json {
   {
     "id": 0,
-    "email": "",
-    "username": "",
-    "password": "",
-    "referral_code_input": "",
-    "platform": ""
+    "email": "demo1@email.com",
+    "username": "demo1",
+    "password": "noufal",
+    "referral_code_input": "54JSH1",
+    "platform": "mobile"
   }
 }
 

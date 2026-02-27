@@ -48,7 +48,6 @@ class Review(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="reviews",
-        null=True,
     )
     tags = models.ManyToManyField(Tag, related_name="reviews")
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="reviews")

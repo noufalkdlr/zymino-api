@@ -518,6 +518,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "django-stubs" },
+    { name = "django-stubs-ext" },
     { name = "django-types" },
     { name = "djangorestframework-stubs" },
 ]
@@ -539,6 +540,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "django-stubs", specifier = ">=5.2.9" },
+    { name = "django-stubs-ext", specifier = ">=5.2.9" },
     { name = "django-types", specifier = ">=0.22.0" },
     { name = "djangorestframework-stubs", specifier = ">=3.16.7" },
 ]
