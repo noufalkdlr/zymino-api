@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import Client, Tag, Review
+from .models import ReviewedClient, Tag, Review
 
 
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Client
+        model = ReviewedClient
         fields = ["id", "phone_number"]
 
 

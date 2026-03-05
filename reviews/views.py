@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from users.permissions import IsSuperUser, IsOwner
-from .models import Client, Tag, Review
+from .models import ReviewedClient, Tag, Review
 from .utils import hash_phone_number
 from users.models import UserProfile
 from .serializers import (
@@ -41,7 +41,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
 @CLIENT_VIEWSET_SCHEMA
 class ClientViewSet(viewsets.ModelViewSet):
-    queryset = Client.objects.all()
+    queryset = ReviewedClient.objects.all()
     serializer_class = ClientSerializer
 
     def get_permissions(self):
@@ -67,7 +67,7 @@ class ClientLookupView(APIView):
 
         try:
             hashed_number = hash_phone_number(phone_number)
-            client = get_object_or_404(Client, phone_number=hashed_number)
+            client = get_object_or_404(ReviewedClient, phone_number=hashed_number)
 
             return Response(
                 {"client_id": client.id, "message": "Client found successfully"},
@@ -109,7 +109,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         client_id = self.kwargs["client_id"]
-        client = get_object_or_404(Client, id=client_id)
+        client = get_object_or_404(ReviewedClient, id=client_id)
 
         return serializer.save(author=self.request.user, client=client)
 

@@ -5,7 +5,7 @@ from django.conf import settings
 from .utils import hash_phone_number
 
 
-class Client(models.Model):
+class ReviewedClient(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone_number = models.CharField(max_length=100, unique=True)
 
@@ -50,7 +50,7 @@ class Review(models.Model):
         related_name="reviews",
     )
     tags = models.ManyToManyField(Tag, related_name="reviews")
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="reviews")
+    client = models.ForeignKey(ReviewedClient, on_delete=models.CASCADE, related_name="reviews")
 
     class Meta:
         constraints = [

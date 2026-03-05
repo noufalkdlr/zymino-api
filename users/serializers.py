@@ -85,6 +85,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "email",
             "username",
             "full_name",
+            "profile_picture",
             "phone_number",
             "job_title",
             "referral_code",

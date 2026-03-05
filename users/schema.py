@@ -4,9 +4,14 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
     OpenApiParameter,
+    OpenApiResponse,
 )
 from drf_spectacular.types import OpenApiTypes
-from .serializers import UserDetailSerializer, UserLoginSerializer
+from .serializers import (
+    UserDetailSerializer,
+    UserLoginSerializer,
+    UserProfileSerializer,
+)
 
 
 USER_SIGNUP_SCHEMA = extend_schema_view(
@@ -28,6 +33,14 @@ USER_SIGNUP_SCHEMA = extend_schema_view(
     )
 )
 
+USER_DELETE_SCHEMA = extend_schema_view(
+    delete=extend_schema(
+        tags=["Authentication"],
+        summary="Delete User Account",
+        description="Permanently deletes the currently authenticated user's account and their profile. If the request is from a web platform, it also clears the authentication cookies.",
+    )
+)
+
 USER_PROFILE_SCHEMA = extend_schema_view(
     get=extend_schema(
         tags=["Users"],
@@ -38,11 +51,13 @@ USER_PROFILE_SCHEMA = extend_schema_view(
         tags=["Users"],
         summary="Partial Update User Profile",
         description="Updates specific fields of the user's profile.",
+        request={"multipart/form-data": UserProfileSerializer},
     ),
     put=extend_schema(
         tags=["Users"],
         summary="Update User Profile",
         description="Updates the entire profile of the user.",
+        request={"multipart/form-data": UserProfileSerializer},
     ),
 )
 

@@ -1,8 +1,9 @@
 from django.conf import settings
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -20,6 +21,7 @@ from .schema import (
     USER_LOGOUT_SCHEMA,
     USER_SIGNUP_SCHEMA,
     TOKEN_REFRESH_SCHEMA,
+    USER_DELETE_SCHEMA,
 )
 
 logger = logging.getLogger(__name__)
@@ -78,11 +80,27 @@ class UserSignupView(CreateAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@USER_DELETE_SCHEMA
+class UserDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        user.delete()
+
+        response = Response(
+            {"message": "Account successfully deleted."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+        return response
+
 
 @USER_PROFILE_SCHEMA
 class UserProfileView(RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_object(self):
         profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
