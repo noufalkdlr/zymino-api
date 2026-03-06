@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     "storages",
     "users",
     "reviews.apps.ReviewsConfig",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 MIDDLEWARE = [
@@ -177,7 +178,7 @@ if USE_S3_STORAGE:
     # Optional but recommended settings
     AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
     AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_QUERYSTRING_AUTH = False   # Ensure clean URLs without query string tokens
+    AWS_QUERYSTRING_AUTH = False  # Ensure clean URLs without query string tokens
 
     # Modern Django STORAGES configuration for R2
     STORAGES = {
@@ -192,7 +193,7 @@ else:
     # Local Storage (Fallback for Development)
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
-    
+
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -201,7 +202,6 @@ else:
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
-
 
 
 AUTH_USER_MODEL = "users.User"
