@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import F
+from django.core.cache import cache
 from .models import User, UserProfile
 from .utils import generate_unique_referral_code
 
@@ -11,6 +12,8 @@ REFERRER_BONUS_CREDITS = 30
 
 @transaction.atomic
 def create_user_account(validated_data):
+
+    email = validated_data.get("email")
 
     referral_code_input = validated_data.pop("referral_code_input", None)
     full_name = validated_data.pop("full_name")
@@ -37,5 +40,9 @@ def create_user_account(validated_data):
         referred_by=referred_by_user,
         credit_points=initial_credits,
     )
+
+    if email:
+        cache.delete(f"otp_{email}")
+        cache.delete(f"verified_{email}")
 
     return user

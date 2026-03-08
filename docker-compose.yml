@@ -29,6 +29,8 @@ services:
       db:
         # Wait for the database healthcheck to pass before starting the web service
         condition: service_healthy
+      redis:
+        condition: service_started
     restart: unless-stopped
 
   nginx:
@@ -45,7 +47,17 @@ services:
       - web
     restart: unless-stopped
 
+  redis:
+    image: redis:alpine
+    container_name: cashevide_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
   postgres_data:
   static_volume:
   media_volume:
+  redis_data:

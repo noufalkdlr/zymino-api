@@ -3,6 +3,48 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import User, UserProfile
 from .services import create_user_account
+from django.core.cache import cache
+
+
+class OTPRequestSerializer(serializers.Serializer):
+    """Serializer for requesting an OTP"""
+
+    email = serializers.EmailField(required=True, write_only=True)
+
+    def validate_email(self, email):
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                "An account with this email address already exists."
+            )
+
+        return email
+
+
+class OTPVerificationSerializer(serializers.Serializer):
+    """Serializer for verifying the OTP"""
+
+    otp = serializers.CharField(write_only=True, required=True)
+    email = serializers.EmailField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        otp = attrs.get("otp")
+        email = attrs.get("email")
+
+        cached_otp = cache.get(f"otp_{email}")
+        if not cached_otp:
+            raise serializers.ValidationError(
+                {
+                    "otp": "The OTP has expired or does not exist. Please request a new one."
+                }
+            )
+        if cached_otp != otp:
+            raise serializers.ValidationError(
+                {"otp": "The provided OTP is invalid. Please try again."}
+            )
+
+        cache.set(f"verified_{email}", True, timeout=900)
+
+        return attrs
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -34,6 +76,20 @@ class UserDetailSerializer(serializers.ModelSerializer):
             )
 
         return referral_code_input
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+
+        is_verified = cache.get(f"verified_{email}")
+
+        if not is_verified:
+            raise serializers.ValidationError(
+                {
+                    "email": "This email address has not been verified. Please verify it using an OTP first."
+                }
+            )
+
+        return attrs
 
     def create(self, validated_data):
         return create_user_account(validated_data)

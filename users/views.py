@@ -3,6 +3,7 @@ from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, Destro
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
+from django.core.cache import cache
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -10,11 +11,16 @@ from rest_framework_simplejwt.views import TokenRefreshView
 import logging
 from .models import UserProfile, User
 from .serializers import (
+    OTPRequestSerializer,
+    OTPVerificationSerializer,
     UserDetailSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
 )
+from .utils import generate_otp, send_otp_email
 from .schema import (
+    OTP_REQUEST_SCHEMA,
+    OTP_VERIFICATION_SCHEMA,
     USER_LOGIN_SCHEMA,
     USER_PROFILE_SCHEMA,
     USER_CHECK_FIELD_SCHEMA,
@@ -25,6 +31,52 @@ from .schema import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+@OTP_REQUEST_SCHEMA
+class OTPRequestView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request, *args, **kwargs):
+
+        serializer = OTPRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data.get("email")
+            otp = generate_otp()
+
+            try:
+                send_otp_email(email, otp)
+                cache.set(f"otp_{email}", value=otp, timeout=300)
+                return Response(
+                    {
+                        "message": "An OTP has been successfully sent to your email address."
+                    },
+                    status=status.HTTP_200_OK,
+                )
+
+            except Exception:
+                return Response(
+                    {"error": "Failed to send the OTP. Please try again later."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@OTP_VERIFICATION_SCHEMA
+class OTPVerificationView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request, *args, **kwargs):
+        serializer = OTPVerificationSerializer(data=request.data)
+
+        if serializer.is_valid():
+            return Response(
+                {"message": "Email verification successful."},
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @USER_SIGNUP_SCHEMA

@@ -8,11 +8,81 @@ from drf_spectacular.utils import (
 )
 from drf_spectacular.types import OpenApiTypes
 from .serializers import (
+    OTPRequestSerializer,
+    OTPVerificationSerializer,
     UserDetailSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
 )
 
+
+OTP_REQUEST_SCHEMA = extend_schema_view(
+    post=extend_schema(
+        tags=["Authentication"],
+        summary="Request OTP",
+        description="Sends a One-Time Password (OTP) to the provided email address for user verification. "
+        "Validates if the email is already registered.",
+        request=OTPRequestSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name="OTPRequestSuccess",
+                    fields={
+                        "message": serializers.CharField(
+                            default="An OTP has been successfully sent to your email address."
+                        )
+                    },
+                ),
+                description="OTP sent successfully.",
+            ),
+            400: OpenApiResponse(
+                response=inline_serializer(
+                    name="OTPRequestError",
+                    fields={
+                        "error": serializers.CharField(
+                            default="Failed to send the OTP. Please try again later. (Or email already exists)"
+                        )
+                    },
+                ),
+                description="Bad Request. Invalid email format, or email already registered.",
+            ),
+        },
+    )
+)
+
+
+OTP_VERIFICATION_SCHEMA = extend_schema_view(
+    post=extend_schema(
+        tags=["Authentication"],
+        summary="Verify OTP",
+        description="Verifies the OTP sent to the user's email address. Ensures the OTP is valid and has not expired.",
+        request=OTPVerificationSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name="OTPVerifySuccess",
+                    fields={
+                        "message": serializers.CharField(
+                            default="OTP verified successfully."
+                        )
+                    },
+                ),
+                description="OTP successfully verified.",
+            ),
+            400: OpenApiResponse(
+                response=inline_serializer(
+                    name="OTPVerifyError",
+                    fields={
+                        "error": serializers.CharField(
+                            default="Invalid or expired OTP."
+                        )
+                    },
+                ),
+                description="Bad Request. OTP is incorrect or has expired.",
+            ),
+        },
+    )
+)
 
 USER_SIGNUP_SCHEMA = extend_schema_view(
     post=extend_schema(
