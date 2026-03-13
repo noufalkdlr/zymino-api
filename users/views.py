@@ -36,6 +36,9 @@ from .schema import (
     PASSWORD_CHANGE_SCHEMA,
     USER_LOGOUT_SCHEMA,
     USER_SIGNUP_SCHEMA,
+    PASSWORD_RESET_OTP_REQUEST_SCHEMA,
+    PASSWORD_RESET_OTP_VERIFICATION_SCHEMA,
+    PASSWORD_RESET_SCHEMA,
     TOKEN_REFRESH_SCHEMA,
     USER_DELETE_SCHEMA,
 )
@@ -219,12 +222,14 @@ class PasswordChangeView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@PASSWORD_RESET_OTP_REQUEST_SCHEMA
 class PasswordResetOTPRequestView(BaseOTPRequestView):
     otp_cache_prefix = "password_reset"
     OTPRequestSerializer = PasswordResetOTPRequestSerializer
     purpose = "password_reset"
 
 
+@PASSWORD_RESET_OTP_VERIFICATION_SCHEMA
 class PasswordResetOTPVerificationView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -240,6 +245,7 @@ class PasswordResetOTPVerificationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@PASSWORD_RESET_SCHEMA
 class PasswordResetView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []

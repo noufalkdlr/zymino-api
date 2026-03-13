@@ -8,12 +8,15 @@ from drf_spectacular.utils import (
 )
 from drf_spectacular.types import OpenApiTypes
 from .serializers import (
+    PasswordResetSerializer,
     SignupOTPRequestSerializer,
     SignupOTPVerificationSerializer,
     UserDetailSerializer,
     PasswordChangeSerializer,
+    PasswordResetOTPRequestSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
+    PasswordResetVerificationSerializer,
 )
 
 
@@ -235,6 +238,111 @@ USER_LOGIN_SCHEMA = extend_schema_view(
         "* If platform is `web`: JWT tokens are set securely as HttpOnly cookies.\n"
         "* If platform is `mobile` (default): JWT tokens are returned directly in the JSON response.",
         request=UserLoginSerializer,
+    )
+)
+
+PASSWORD_RESET_OTP_REQUEST_SCHEMA = extend_schema_view(
+    post=extend_schema(
+        tags=["Authentication"],
+        summary="Request Password Reset OTP",
+        description="Sends a One-Time Password (OTP) to the user's email to initiate the password reset process. Fails if the email is not registered in the system.",
+        request=PasswordResetOTPRequestSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name="PasswordResetOTPRequestSuccess",
+                    fields={
+                        "message": serializers.CharField(
+                            default="An OTP has been successfully sent to your email address."
+                        )
+                    },
+                ),
+                description="OTP sent successfully.",
+            ),
+            400: OpenApiResponse(
+                response=inline_serializer(
+                    name="PasswordResetOTPRequestError",
+                    fields={
+                        "email": serializers.ListField(
+                            child=serializers.CharField(
+                                default="No account found with this email address."
+                            )
+                        )
+                    },
+                ),
+                description="Bad Request. Email not found or invalid format.",
+            ),
+        },
+    )
+)
+
+PASSWORD_RESET_OTP_VERIFICATION_SCHEMA = extend_schema_view(
+    post=extend_schema(
+        tags=["Authentication"],
+        summary="Verify Password Reset OTP",
+        description="Verifies the OTP sent for password reset. Validates that the OTP is correct and hasn't expired.",
+        request=PasswordResetVerificationSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name="PasswordResetOTPVerifySuccess",
+                    fields={
+                        "message": serializers.CharField(
+                            default="Email verification successful."
+                        )
+                    },
+                ),
+                description="OTP verified successfully.",
+            ),
+            400: OpenApiResponse(
+                response=inline_serializer(
+                    name="PasswordResetOTPVerifyError",
+                    fields={
+                        "otp": serializers.ListField(
+                            child=serializers.CharField(
+                                default="The OTP has expired or does not exist. Please request a new one."
+                            )
+                        )
+                    },
+                ),
+                description="Bad Request. Invalid or expired OTP.",
+            ),
+        },
+    )
+)
+
+PASSWORD_RESET_SCHEMA = extend_schema_view(
+    post=extend_schema(
+        tags=["Authentication"],
+        summary="Reset User Password",
+        description="Resets the user's password securely. Requires the email to be verified via the OTP verification endpoint first.",
+        request=PasswordResetSerializer,
+        responses={
+            200: OpenApiResponse(
+                response=inline_serializer(
+                    name="PasswordResetSuccess",
+                    fields={
+                        "detail": serializers.CharField(
+                            default="Password has been updated successfully."
+                        )
+                    },
+                ),
+                description="Password successfully reset.",
+            ),
+            400: OpenApiResponse(
+                response=inline_serializer(
+                    name="PasswordResetError",
+                    fields={
+                        "email": serializers.ListField(
+                            child=serializers.CharField(
+                                default="This email address has not been verified. Please verify it using an OTP first."
+                            )
+                        )
+                    },
+                ),
+                description="Bad Request. Email not verified or validation errors.",
+            ),
+        },
     )
 )
 
