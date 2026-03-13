@@ -1,0 +1,9 @@
+### Refresh access token
+
+POST {{base_url}}/users/token/refresh/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "platform": "mobile",
+  "refresh": "{{refresh}}"
+}

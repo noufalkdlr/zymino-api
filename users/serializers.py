@@ -1,4 +1,3 @@
-from django.db.models import F, CharField
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate
@@ -7,7 +6,36 @@ from .services import create_user_account
 from django.core.cache import cache
 
 
-class OTPRequestSerializer(serializers.Serializer):
+class BaseOTPVerificationSerializer(serializers.Serializer):
+    """Serializer for verifying the OTP"""
+
+    cache_prefix = None
+
+    otp = serializers.CharField(write_only=True, required=True)
+    email = serializers.EmailField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        otp = attrs.get("otp")
+        email = attrs.get("email")
+
+        cached_otp = cache.get(f"{self.cache_prefix}_otp_{email}")
+        if not cached_otp:
+            raise serializers.ValidationError(
+                {
+                    "otp": "The OTP has expired or does not exist. Please request a new one."
+                }
+            )
+        if cached_otp != otp:
+            raise serializers.ValidationError(
+                {"otp": "The provided OTP is invalid. Please try again."}
+            )
+
+        cache.set(f"{self.cache_prefix}_verified_{email}", True, timeout=900)
+
+        return attrs
+
+
+class SignupOTPRequestSerializer(serializers.Serializer):
     """Serializer for requesting an OTP"""
 
     email = serializers.EmailField(required=True, write_only=True)
@@ -21,31 +49,8 @@ class OTPRequestSerializer(serializers.Serializer):
         return email
 
 
-class OTPVerificationSerializer(serializers.Serializer):
-    """Serializer for verifying the OTP"""
-
-    otp = serializers.CharField(write_only=True, required=True)
-    email = serializers.EmailField(write_only=True, required=True)
-
-    def validate(self, attrs):
-        otp = attrs.get("otp")
-        email = attrs.get("email")
-
-        cached_otp = cache.get(f"otp_{email}")
-        if not cached_otp:
-            raise serializers.ValidationError(
-                {
-                    "otp": "The OTP has expired or does not exist. Please request a new one."
-                }
-            )
-        if cached_otp != otp:
-            raise serializers.ValidationError(
-                {"otp": "The provided OTP is invalid. Please try again."}
-            )
-
-        cache.set(f"verified_{email}", True, timeout=900)
-
-        return attrs
+class SignupOTPVerificationSerializer(BaseOTPVerificationSerializer):
+    cache_prefix = "signup"
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -81,7 +86,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         email = attrs.get("email")
 
-        is_verified = cache.get(f"verified_{email}")
+        is_verified = cache.get(f"signup_verified_{email}")
 
         if not is_verified:
             raise serializers.ValidationError(
@@ -161,19 +166,34 @@ class PasswordChangeSerializer(serializers.Serializer):
         return user
 
 
+class PasswordResetOTPRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(write_only=True)
+
+    def validate_email(self, value):
+
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "No account found with this email address."
+            )
+
+        return value
+
+
+class PasswordResetVerificationSerializer(BaseOTPVerificationSerializer):
+    cache_prefix = "password_reset"
+
+
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField(write_only=True)
     new_password = serializers.CharField(write_only=True)
 
     def validate_email(self, value):
 
-        is_verified = cache.get(f"verified_{value}")
+        is_verified = cache.get(f"password_reset_verified_{value}")
 
         if not is_verified:
             raise serializers.ValidationError(
-                {
-                    "email": "This email address has not been verified. Please verify it using an OTP first."
-                }
+                "This email address has not been verified. Please verify it using an OTP first."
             )
         return value
 
@@ -184,6 +204,6 @@ class PasswordResetSerializer(serializers.Serializer):
         user.save()
 
         if email:
-            cache.delete(f"otp_{email}")
-            cache.delete(f"verified_{email}")
+            cache.delete(f"password_reset_otp_{email}")
+            cache.delete(f"password_reset_verified_{email}")
         return user

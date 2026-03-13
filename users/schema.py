@@ -8,8 +8,8 @@ from drf_spectacular.utils import (
 )
 from drf_spectacular.types import OpenApiTypes
 from .serializers import (
-    OTPRequestSerializer,
-    OTPVerificationSerializer,
+    SignupOTPRequestSerializer,
+    SignupOTPVerificationSerializer,
     UserDetailSerializer,
     PasswordChangeSerializer,
     UserLoginSerializer,
@@ -23,7 +23,7 @@ OTP_REQUEST_SCHEMA = extend_schema_view(
         summary="Request OTP",
         description="Sends a One-Time Password (OTP) to the provided email address for user verification. "
         "Validates if the email is already registered.",
-        request=OTPRequestSerializer,
+        request=SignupOTPRequestSerializer,
         responses={
             200: OpenApiResponse(
                 response=inline_serializer(
@@ -57,7 +57,7 @@ OTP_VERIFICATION_SCHEMA = extend_schema_view(
         tags=["Authentication"],
         summary="Verify OTP",
         description="Verifies the OTP sent to the user's email address. Ensures the OTP is valid and has not expired.",
-        request=OTPVerificationSerializer,
+        request=SignupOTPVerificationSerializer,
         responses={
             200: OpenApiResponse(
                 response=inline_serializer(

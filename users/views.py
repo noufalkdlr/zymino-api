@@ -8,18 +8,25 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
+
 import logging
+
 from .models import UserProfile, User
+
 from .serializers import (
-    OTPRequestSerializer,
-    OTPVerificationSerializer,
+    SignupOTPRequestSerializer,
+    SignupOTPVerificationSerializer,
     UserDetailSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
     PasswordChangeSerializer,
+    PasswordResetOTPRequestSerializer,
+    PasswordResetVerificationSerializer,
     PasswordResetSerializer,
 )
-from .utils import generate_otp, send_otp_email
+
+from .utils import generate_otp, send_otp_email, set_auth_cookies, clear_auth_session
+
 from .schema import (
     OTP_REQUEST_SCHEMA,
     OTP_VERIFICATION_SCHEMA,
@@ -36,21 +43,26 @@ from .schema import (
 logger = logging.getLogger(__name__)
 
 
-@OTP_REQUEST_SCHEMA
-class OTPRequestView(APIView):
+class BaseOTPRequestView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    otp_cache_prefix = None
+    OTPRequestSerializer = None
+    purpose = "signup"
+
     def post(self, request, *args, **kwargs):
 
-        serializer = OTPRequestSerializer(data=request.data)
+        serializer = self.OTPRequestSerializer(data=request.data)  # type:ignore
         if serializer.is_valid():
             email = serializer.validated_data.get("email")
             otp = generate_otp()
 
             try:
-                send_otp_email(email, otp)
-                cache.set(f"otp_{email}", value=otp, timeout=300)
+                send_otp_email(email, otp, self.purpose)
+                cache.set(
+                    f"{self.otp_cache_prefix}_otp_{email}", value=otp, timeout=300
+                )
                 return Response(
                     {
                         "message": "An OTP has been successfully sent to your email address."
@@ -66,13 +78,19 @@ class OTPRequestView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@OTP_REQUEST_SCHEMA
+class SignupOTPRequestView(BaseOTPRequestView):
+    otp_cache_prefix = "signup"
+    OTPRequestSerializer = SignupOTPRequestSerializer
+
+
 @OTP_VERIFICATION_SCHEMA
-class OTPVerificationView(APIView):
+class SignupOTPVerificationView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
-        serializer = OTPVerificationSerializer(data=request.data)
+        serializer = SignupOTPVerificationSerializer(data=request.data)
 
         if serializer.is_valid():
             return Response(
@@ -97,41 +115,13 @@ class UserSignupView(CreateAPIView):
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
 
-            if platform == "web":
-                response = Response(
-                    {
-                        "message": "login successful",
-                        "user": UserDetailSerializer(user).data,
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
-                response.set_cookie(
-                    key="access_token",
-                    value=access_token,
-                    httponly=True,
-                    secure=not settings.DEBUG,
-                    samesite="Lax",
-                    domain=settings.COOKIE_DOMAIN,
-                )
-                response.set_cookie(
-                    key="refresh_token",
-                    value=str(refresh),
-                    httponly=True,
-                    secure=not settings.DEBUG,
-                    samesite="Lax",
-                    domain=settings.COOKIE_DOMAIN,
-                )
-            else:
-                response = Response(
-                    {
-                        "message": "login successful",
-                        "user": UserDetailSerializer(user).data,
-                        "access": access_token,
-                        "refresh": str(refresh),
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
-            return response
+            return set_auth_cookies(
+                user=user,
+                platform=platform,
+                refresh=refresh,
+                access_token=access_token,
+                is_signup=True,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -200,41 +190,13 @@ class LoginView(APIView):
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
 
-            if platform == "web":
-                response = Response(
-                    {
-                        "message": "login successful",
-                        "user": UserDetailSerializer(user).data,
-                    },
-                    status=status.HTTP_200_OK,
-                )
-                response.set_cookie(
-                    key="access_token",
-                    value=access_token,
-                    httponly=True,
-                    secure=not settings.DEBUG,
-                    samesite="Lax",
-                    domain=settings.COOKIE_DOMAIN,
-                )
-                response.set_cookie(
-                    key="refresh_token",
-                    value=str(refresh),
-                    httponly=True,
-                    secure=not settings.DEBUG,
-                    samesite="Lax",
-                    domain=settings.COOKIE_DOMAIN,
-                )
-            else:
-                response = Response(
-                    {
-                        "message": "login successful",
-                        "user": UserDetailSerializer(user).data,
-                        "access": access_token,
-                        "refresh": str(refresh),
-                    },
-                    status=status.HTTP_200_OK,
-                )
-            return response
+            return set_auth_cookies(
+                user=user,
+                platform=platform,
+                refresh=refresh,
+                access_token=access_token,
+                is_signup=False,
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -252,52 +214,30 @@ class PasswordChangeView(APIView):
 
             refresh_token = serializer.validated_data.get("refresh")
 
-            if not refresh_token:
-                refresh_token = request.COOKIES.get("refresh_token")
-
-            if refresh_token:
-                try:
-                    token = RefreshToken(refresh_token)
-                    token.blacklist()
-                except Exception as e:
-                    logger.error(f"Token blacklist failed during password change: {e}")
-                    pass
-
-            response = Response(
-                {"detail": "Password has been updated successfully."},
-                status=status.HTTP_200_OK,
-            )
-
-            response.delete_cookie("access_token", domain=settings.COOKIE_DOMAIN)
-            response.delete_cookie("refresh_token", domain=settings.COOKIE_DOMAIN)
-
-            return response
+            return clear_auth_session(refresh_token=refresh_token, request=request)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OTPRequestView2(APIView):
+class PasswordResetOTPRequestView(BaseOTPRequestView):
+    otp_cache_prefix = "password_reset"
+    OTPRequestSerializer = PasswordResetOTPRequestSerializer
+    purpose = "password_reset"
+
+
+class PasswordResetOTPVerificationView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
+        serializer = PasswordResetVerificationSerializer(data=request.data)
 
-        email = request.data.get("email")
-        otp = generate_otp()
-
-        try:
-            send_otp_email(email, otp)
-            cache.set(f"otp_{email}", value=otp, timeout=300)
+        if serializer.is_valid():
             return Response(
-                {"message": "An OTP has been successfully sent to your email address."},
+                {"message": "Email verification successful."},
                 status=status.HTTP_200_OK,
             )
-
-        except Exception:
-            return Response(
-                {"error": "Failed to send the OTP. Please try again later."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordResetView(APIView):
@@ -390,6 +330,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             response.set_cookie(
                 "access_token",
                 access_token,
+                max_age=5 * 60,
                 httponly=True,
                 secure=not settings.DEBUG,
                 samesite="Lax",
@@ -398,6 +339,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             response.set_cookie(
                 "refresh_token",
                 new_refresh_token,
+                max_age=90 * 24 * 60 * 60,
                 httponly=True,
                 secure=not settings.DEBUG,
                 samesite="Lax",
@@ -424,24 +366,6 @@ class UserDeleteView(APIView):
 
         refresh_token = request.data.get("refresh")
 
-        if not refresh_token:
-            refresh_token = request.COOKIES.get("refresh_token")
-
-        if refresh_token:
-            try:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
-            except Exception:
-                pass
-
-        user.delete()
-
-        response = Response(
-            {"message": "Account successfully deleted."},
-            status=status.HTTP_200_OK,
+        return clear_auth_session(
+            refresh_token=refresh_token, request=request, user=user
         )
-
-        response.delete_cookie("access_token", domain=settings.COOKIE_DOMAIN)
-        response.delete_cookie("refresh_token", domain=settings.COOKIE_DOMAIN)
-
-        return response

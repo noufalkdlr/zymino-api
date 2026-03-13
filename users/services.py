@@ -42,7 +42,7 @@ def create_user_account(validated_data):
     )
 
     if email:
-        cache.delete(f"otp_{email}")
-        cache.delete(f"verified_{email}")
+        cache.delete(f"signup_otp_{email}")
+        cache.delete(f"signup_verified_{email}")
 
     return user
