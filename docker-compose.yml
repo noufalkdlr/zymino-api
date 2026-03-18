@@ -51,8 +51,9 @@ services:
     image: redis:alpine
     container_name: cashevide_redis
     restart: always
-    ports:
-      - "6379:6379"
+    env_file:
+      - .env
+    command: sh -c 'exec redis-server --requirepass "$$REDIS_PASSWORD"'
     volumes:
       - redis_data:/data
 

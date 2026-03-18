@@ -6,7 +6,7 @@ Content-Type: application/json
 {
   "email": "demo@email.com",
   "full_name": "Demo",
-  "password": "noufalka",
+  "password": "noufal123",
   "platform": "mobile",
   "referral_code_input": "NOUFAL",
   "username": "demo"
