@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import ReviewedClient, Tag, Review
+
+from .models import Review, ReviewedClient, Tag
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -21,7 +22,7 @@ class TagSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ["id", "author", "tags", "client"]
+        fields = ["id", "author", "tags", "ratings", "client"]
         read_only_fields = ["author", "client"]
 
     def validate_tags(self, tags):
@@ -61,7 +62,7 @@ class ReviewListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ["id", "tags", "author"]
+        fields = ["id", "tags", "ratings", "author"]
 
 
 class UserReviewListSerializer(serializers.ModelSerializer):

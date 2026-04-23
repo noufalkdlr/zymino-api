@@ -1,5 +1,0 @@
-### 
-
-GET {{base_url}}/tags/ HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer {{token}}

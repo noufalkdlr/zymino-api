@@ -1,28 +1,28 @@
-from rest_framework import viewsets
-from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from users.permissions import IsSuperUser, IsOwner
-from .models import ReviewedClient, Tag, Review
-from .utils import hash_phone_number
-from users.models import UserProfile
-from .serializers import (
-    ClientSerializer,
-    TagSerializer,
-    ReviewSerializer,
-    ReviewListSerializer,
-    ClientLookupSerializer,
-    UserReviewListSerializer,
-)
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from users.permissions import IsOwner, IsSuperUser
+
+from .models import Review, ReviewedClient, Tag
 from .schema import (
     CLIENT_LOOKUP_SCHEMA,
     CLIENT_VIEWSET_SCHEMA,
-    TAG_VIEWSET_SCHEMA,
     REVIEW_VIEWSET_SCHEMA,
+    TAG_VIEWSET_SCHEMA,
     USER_REVIEW_VIEWSET_SCHEMA,
 )
+from .serializers import (
+    ClientLookupSerializer,
+    ClientSerializer,
+    ReviewListSerializer,
+    ReviewSerializer,
+    TagSerializer,
+    UserReviewListSerializer,
+)
+from .utils import hash_phone_number
 
 
 @TAG_VIEWSET_SCHEMA

@@ -1,0 +1,19 @@
+### GET Tags
+
+GET {{base_url}}/tags/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+### GET Client
+
+GET {{base_url}}/clients/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+### GET Review
+
+GET {{base_url}}/client/d4974cdc-3a5f-41f5-b0fe-e3682bff1d0b/reviews/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
