@@ -92,7 +92,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ["list", "create", "summary"]:
+        if self.action in ["list", "create"]:
             permission_classes = [IsAuthenticated]
 
         else:
@@ -146,7 +146,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
         data = {
-            "average_rating": round(stats["avg_rating"], 1)
+            "avarage_rating": round(stats["avg_rating"], 1)
             if stats["avg_rating"]
             else 0,
             "total_reviews": stats["total"],

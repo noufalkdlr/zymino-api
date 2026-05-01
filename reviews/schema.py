@@ -79,6 +79,11 @@ REVIEW_VIEWSET_SCHEMA = extend_schema_view(
         summary="Get reviews for a client",
         description="Retrieve all reviews associated with a specific client.",
     ),
+    summary=extend_schema(
+        tags=["Reviews"],
+        summary="Get client review summary",
+        description="Returns average rating, total reviews, distribution, and tags summary.",
+    ),
     create=extend_schema(
         tags=["Reviews"],
         summary="Post a review for a client",
