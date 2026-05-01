@@ -22,10 +22,6 @@ urlpatterns = [
         ReviewViewSet.as_view({"get": "list", "post": "create"}, name="client_review"),
     ),
     path(
-        "client/<uuid:client_id>/reviews/summary/",
-        ReviewViewSet.as_view({"get": "summary"}, name="client_review_summary"),
-    ),
-    path(
         "client/<uuid:client_id>/reviews/<int:pk>/",
         ReviewViewSet.as_view(
             {

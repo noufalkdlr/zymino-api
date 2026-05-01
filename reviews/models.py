@@ -12,6 +12,9 @@ class ReviewedClient(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone_number = models.CharField(max_length=100, unique=True)
 
+    def __str__(self):
+        return str(self.id)
+
     def save(self, *args, **kwargs):
         if not self.phone_number.startswith("sha256$"):
             try:
@@ -26,9 +29,6 @@ class ReviewedClient(models.Model):
                 raise ValueError(f"Error processing number: {e}")
 
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return str(self.id)
 
 
 class Tag(models.Model):

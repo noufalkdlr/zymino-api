@@ -1,18 +1,19 @@
 from django.urls import path
+
 from .views import (
-    SignupOTPRequestView,
-    PasswordResetOTPRequestView,
-    SignupOTPVerificationView,
-    UserSignupView,
+    CheckFieldExistsView,
+    CustomTokenRefreshView,
     LoginView,
     LogoutView,
-    CustomTokenRefreshView,
-    UserProfileView,
-    CheckFieldExistsView,
     PasswordChangeView,
-    PasswordResetView,
+    PasswordResetOTPRequestView,
     PasswordResetOTPVerificationView,
+    PasswordResetView,
+    SignupOTPRequestView,
+    SignupOTPVerificationView,
     UserDeleteView,
+    UserProfileView,
+    UserSignupView,
 )
 
 urlpatterns = [

@@ -1,7 +1,5 @@
-from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -92,7 +90,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ["list", "create", "summary"]:
+        if self.action in ["list", "create"]:
             permission_classes = [IsAuthenticated]
 
         else:
@@ -114,47 +112,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         client = get_object_or_404(ReviewedClient, id=client_id)
 
         return serializer.save(author=self.request.user, client=client)
-
-    @action(detail=False, methods=["get"])
-    def summary(self, request, client_id=None):
-        queryset = self.get_queryset()
-
-        if not queryset.exists():
-            return Response(
-                {
-                    "average_rating": 0,
-                    "total_reviews": 0,
-                    "rating_distribution": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
-                    "tags_summary": [],
-                }
-            )
-
-        stats = queryset.aggregate(avg_rating=Avg("ratings"), total=Count("id"))
-
-        rating_counts = queryset.values("ratings").annotate(count=Count("id"))
-
-        distribution = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}
-        for rc in rating_counts:
-            if rc["ratings"]:
-                distribution[rc["ratings"]] = rc["count"]
-
-        tags = (
-            Tag.objects.filter(reviews__in=queryset)
-            .annotate(count=Count("reviews"))
-            .values("id", "name", "category", "group", "count")
-            .order_by("-count")
-        )
-
-        data = {
-            "average_rating": round(stats["avg_rating"], 1)
-            if stats["avg_rating"]
-            else 0,
-            "total_reviews": stats["total"],
-            "rating_distribution": distribution,
-            "tags_summary": list(tags),
-        }
-
-        return Response(data)
 
 
 @USER_REVIEW_VIEWSET_SCHEMA

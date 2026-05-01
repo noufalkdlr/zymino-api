@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "storages",
     "users",
     "reviews.apps.ReviewsConfig",
+    "demo",
     "django_cleanup.apps.CleanupConfig",
 ]
 
