@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .models import User, UserProfile
+from .models import User, UserBusinessProfile, UserProfile
 from .schema import (
     OTP_REQUEST_SCHEMA,
     OTP_VERIFICATION_SCHEMA,
@@ -34,6 +34,7 @@ from .serializers import (
     PasswordResetVerificationSerializer,
     SignupOTPRequestSerializer,
     SignupOTPVerificationSerializer,
+    UserBusinessProfileSerializer,
     UserDetailSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
@@ -135,6 +136,16 @@ class UserProfileView(RetrieveUpdateAPIView):
 
     def get_object(self):
         profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
+
+
+class UserBusinessProfileView(RetrieveUpdateAPIView):
+    serializer_class = UserBusinessProfileSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_object(self):
+        profile, _ = UserBusinessProfile.objects.get_or_create(user=self.request.user)
         return profile
 
 

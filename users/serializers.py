@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from .models import User, UserProfile
+from .models import User, UserBusinessProfile, UserProfile
 from .services import create_user_account
 
 
@@ -80,14 +80,17 @@ class UserDetailSerializer(serializers.ModelSerializer):
         ]
 
     def validate_referral_code_input(self, value):
-        if not UserProfile.objects.filter(referral_code=value).exists():
+        try:
+            self.referrer_profile = UserProfile.objects.get(referral_code=value)
+
+        except UserProfile.DoesNotExist:
             raise serializers.ValidationError(
                 "The referral code provided is incorrect. Please check it."
             )
-
         return value
 
     def validate(self, attrs):
+        attrs = super().validate(attrs)
         email = attrs.get("email")
 
         is_verified = cache.get(f"signup_verified_{email}")
@@ -102,7 +105,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        return create_user_account(validated_data)
+        referrer_profile = getattr(self, "referrer_profile", None)
+        return create_user_account(validated_data, referrer_profile=referrer_profile)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -128,6 +132,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "referral_code",
             "referred_by",
             "credit_points",
+        ]
+
+
+class UserBusinessProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+
+    class Meta:
+        model = UserBusinessProfile
+        fields = [
+            "user_id",
+            "business_name",
+            "logo",
+            "gst_number",
+            "vat_number",
+            "address",
+            "phone_number",
+            "website",
+            "default_currency",
         ]
 
 

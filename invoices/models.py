@@ -1,0 +1,199 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models import F, GeneratedField, Sum
+
+from catalog.models import Product
+from clients.models import Client
+
+
+class Invoice(models.Model):
+    class InvoiceStatus(models.TextChoices):
+        DRAFT = "DRAFT", "Draft"
+        UNPAID = "UNPAID", "Unpaid"
+        PARTIALLY_PAID = "PARTIALLY_PAID", "Partially Paid"
+        PAID = "PAID", "Paid"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="invoices"
+    )
+
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="invoices",
+    )
+
+    name = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(blank=True, default="")
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True, default="")
+
+    invoice_number = models.CharField(max_length=50, blank=True)
+    status = models.CharField(
+        max_length=20, choices=InvoiceStatus.choices, default=InvoiceStatus.DRAFT
+    )
+
+    currency = models.CharField(max_length=3, default="INR")
+
+    issue_date = models.DateField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True)
+
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    discount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+
+    amount_paid = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.invoice_number} - {self.name or 'Draft'}"
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        if not self.invoice_number:
+            last_invoice = Invoice.objects.filter(user=self.user).order_by("id").last()
+            if not last_invoice or not last_invoice.invoice_number.startswith("INV-"):
+                self.invoice_number = "INV-0001"
+            else:
+                last_number_str = last_invoice.invoice_number.split("-")[1]
+                new_number = int(last_number_str) + 1
+                self.invoice_number = f"INV-{new_number:04d}"
+
+        if self.client:
+            if not self.name:
+                self.name = self.client.name
+
+            if not self.email:
+                self.email = self.client.email
+
+            if not self.phone:
+                self.phone = self.client.phone
+
+            if not self.address:
+                self.address = self.client.address
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if not self.client and not self.name:
+            raise ValidationError("Please select a client or provide a client name.")
+
+    def update_financials(self):
+        items_sum = self.items.aggregate(total_sum=Sum("total"))["total_sum"] or 0.00
+        self.subtotal = items_sum
+
+        self.total_amount = self.subtotal - self.discount
+
+        payments_sum = (
+            self.payments.aggregate(paid_sum=Sum("amount"))["paid_sum"] or 0.00
+        )
+        self.amount_paid = payments_sum
+
+        if self.amount_paid >= self.total_amount and self.total_amount > 0:
+            self.status = self.InvoiceStatus.PAID
+        elif self.amount_paid > 0:
+            self.status = self.InvoiceStatus.PARTIALLY_PAID
+        else:
+            if self.status in [
+                self.InvoiceStatus.PAID,
+                self.InvoiceStatus.PARTIALLY_PAID,
+            ]:
+                self.status = self.InvoiceStatus.UNPAID
+
+        self.save(update_fields=["subtotal", "total_amount", "amount_paid", "status"])
+
+
+class InvoiceItem(models.Model):
+    class UnitType(models.TextChoices):
+        QUANTITY = "QTY", "Quantity"
+        HOURS = "HRS", "Hours"
+        DAYS = "DAYS", "Days"
+
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name="items")
+
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    title = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True, default="")
+
+    unit_type = models.CharField(
+        max_length=4, choices=UnitType.choices, default=UnitType.QUANTITY
+    )
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1.00)
+
+    unit_price = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True
+    )
+
+    total = GeneratedField(
+        expression=F("quantity") * F("unit_price"),
+        output_field=models.DecimalField(max_digits=12, decimal_places=2),
+        db_persist=True,
+    )
+
+    def __str__(self):
+        return f"{self.title} (x{self.quantity})"
+
+    def save(self, *args, **kwargs):
+        self.clean()
+
+        if self.product:
+            if not self.title:
+                self.title = self.product.title
+
+            if not self.description:
+                self.description = self.product.description
+
+            if self.unit_price is None:
+                self.unit_price = self.product.unit_price
+
+        super().save(*args, **kwargs)
+        self.invoice.update_financials()
+
+    def delete(self, *args, **kwargs):
+        invoice = self.invoice
+        result = super().delete(*args, **kwargs)
+        invoice.update_financials()
+        return result
+
+    def clean(self):
+        if not self.product and not self.title:
+            raise ValidationError("Please select a product or provide a title.")
+
+        if not self.product and self.unit_price is None:
+            raise ValidationError("Please select a product or provide a unit price.")
+
+
+class PaymentRecord(models.Model):
+    invoice = models.ForeignKey(
+        Invoice, on_delete=models.CASCADE, related_name="payments"
+    )
+
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    payment_date = models.DateField()
+
+    payment_method = models.CharField(max_length=50, blank=True, default="")
+
+    note = models.CharField(max_length=255, blank=True, default="")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.invoice.invoice_number} - {self.amount} on {self.payment_date}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.invoice.update_financials()
+
+    def delete(self, *args, **kwargs):
+        invoice = self.invoice
+        result = super().delete(*args, **kwargs)
+        invoice.update_financials()
+        return result

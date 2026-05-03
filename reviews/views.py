@@ -92,7 +92,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ["list", "create"]:
+        if self.action in ["list", "create", "summary"]:
             permission_classes = [IsAuthenticated]
 
         else:
